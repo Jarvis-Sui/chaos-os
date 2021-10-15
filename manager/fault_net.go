@@ -2,6 +2,7 @@ package manager
 
 import (
 	"fmt"
+	"time"
 
 	b "github.com/Jarvis-Sui/chaos-os/binding"
 	"github.com/google/uuid"
@@ -25,7 +26,7 @@ func createNetworkDelay(flags *pflag.FlagSet) *b.Fault {
 	})
 
 	args = fmt.Sprintf("%s %s", commonArgs, args)
-	fault := b.Fault{Uid: uuid.NewString(), Type: b.FT_NETDELAY, Status: b.FS_RUNNING, Command: args}
+	fault := b.Fault{Uid: uuid.NewString(), Type: b.FT_NETDELAY, Status: b.FS_READY, Command: args, CreateTime: time.Now()}
 	return &fault
 }
 
@@ -41,19 +42,8 @@ func createNetworkLoss(flags *pflag.FlagSet) *b.Fault {
 	})
 
 	args = fmt.Sprintf("%s %s", commonArgs, args)
-	fault := b.Fault{Uid: uuid.NewString(), Type: b.FT_NETDELAY, Status: b.FS_RUNNING, Command: args}
+	fault := b.Fault{Uid: uuid.NewString(), Type: b.FT_NETLOSS, Status: b.FS_READY, Command: args, CreateTime: time.Now()}
 	return &fault
-	// uid := uuid.NewString()
-	// table := database.GetFaultTable()
-	// if err := table.AddFault(&fault); err != nil {
-	// 	logrus.WithField("err", err).Errorf("failed to add an item to table %s", table.TableName)
-	// 	return uid, err
-	// }
-	// cmd := fmt.Sprintf("%s %s", commonArgs, args)
-	// if err := execute(cmd); err != nil {
-	// 	table.UpdateFaultStatus(uid, string(b.FS_ERROR), fmt.Sprintf("%s", err))
-	// }
-	// return uid, nil
 }
 
 func buildNetCommonArgs(flags *pflag.FlagSet) string {

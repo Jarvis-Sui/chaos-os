@@ -28,3 +28,8 @@ func GetBinPath() string {
 	dir := GetRootPath()
 	return filepath.Join(dir, "chaos-os")
 }
+
+func GetLogPath() string {
+	dir := GetRootPath()
+	return filepath.Join(dir, "chaos-os.log")
+}

@@ -12,16 +12,18 @@ const (
 )
 
 const (
-	FS_RUNNING   FaultStatus = "Running"
 	FS_READY     FaultStatus = "Ready"
+	FS_RUNNING   FaultStatus = "Running"
 	FS_ERROR     FaultStatus = "Error"
 	FS_DESTROYED FaultStatus = "Destoyed"
 )
 
 type Fault struct {
-	Uid        string
-	Type       FaultType
-	Status     FaultStatus
-	Command    string
-	CreateTime time.Time
+	Uid        string      `json:"id"`
+	Type       FaultType   `json:"type"`
+	Status     FaultStatus `json:"status"`
+	Command    string      `json:"command"`
+	Reason     string      `json:"reason"`
+	CreateTime time.Time   `json:"create_time"`
+	UpdateTime time.Time   `json:"update_time"`
 }

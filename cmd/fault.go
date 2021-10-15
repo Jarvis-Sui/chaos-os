@@ -35,12 +35,13 @@ func initFaultCmd() {
 	faultDestroyCmd.MarkFlagRequired("id")
 
 	var limit int
-	var status string
+	var state string
 	faultStatusCmd := &cobra.Command{
 		Use: "status",
+		Run: status,
 	}
 	faultStatusCmd.Flags().StringVar(&id, "id", "", "fault id")
-	faultStatusCmd.Flags().StringVar(&status, "status", "", "status of faults to return")
+	faultStatusCmd.Flags().StringVar(&state, "status", "", "status of faults to return")
 	faultStatusCmd.Flags().IntVar(&limit, "limit", 1, "maximum number of faults returned")
 
 	faultCmd.AddCommand(faultCreateCmd)
