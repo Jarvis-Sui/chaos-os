@@ -2,6 +2,7 @@ package manager
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	b "github.com/Jarvis-Sui/chaos-os/binding"
@@ -10,7 +11,7 @@ import (
 )
 
 func createNetworkDelay(flags *pflag.FlagSet) *b.Fault {
-	commonArgs := fmt.Sprintf("%s create delay %s", binFile, buildNetCommonArgs(flags))
+	commonArgs := fmt.Sprintf("%s create delay %s", netTcBinFile, buildNetCommonArgs(flags))
 
 	args := ""
 	flags.VisitAll(func(f *pflag.Flag) {
@@ -31,7 +32,7 @@ func createNetworkDelay(flags *pflag.FlagSet) *b.Fault {
 }
 
 func createNetworkLoss(flags *pflag.FlagSet) *b.Fault {
-	commonArgs := fmt.Sprintf("%s create loss %s", binFile, buildNetCommonArgs(flags))
+	commonArgs := fmt.Sprintf("%s create loss %s", netTcBinFile, buildNetCommonArgs(flags))
 	args := ""
 	flags.VisitAll(func(f *pflag.Flag) {
 		if f.Name == "percent" {
@@ -58,4 +59,14 @@ func buildNetCommonArgs(flags *pflag.FlagSet) string {
 		}
 	})
 	return args
+}
+
+func getNetFaultInterface(fault *b.Fault) string {
+	args := strings.Split(fault.Command, " ")
+	for i, v := range args {
+		if v == "--interface" {
+			return args[i+1]
+		}
+	}
+	return ""
 }

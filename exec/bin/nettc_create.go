@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
 	"strconv"
 	"strings"
 
@@ -16,8 +14,6 @@ var netemFn = map[string]func(*pflag.FlagSet) string{
 	"delay": netemDelay,
 	"loss":  netemLoss,
 }
-
-var qdisc = "htb"
 
 func initCreateCmd() *cobra.Command {
 	createCmd := &cobra.Command{
@@ -108,19 +104,9 @@ func netemLoss(flags *pflag.FlagSet) string {
 }
 
 func createRootQdiscIfNotExist(device string) {
-	args := fmt.Sprintf("tc qdisc ls dev %s | grep %s | wc -l", device, qdisc)
-	cmd := exec.Command("bash", "-c", args)
-	if out, err := cmd.CombinedOutput(); err != nil {
-		fmt.Fprintf(os.Stderr, "%s. %s\n", out, err)
-		os.Exit(1)
-	} else {
-		if v, _ := strconv.ParseInt(strings.Trim(string(out), "\n"), 10, 64); v == 0 {
-			args := fmt.Sprintf("tc qdisc add dev %s root handle 1: %s", device, qdisc)
-			cmd := exec.Command("bash", "-c", args)
-			if out, err := cmd.CombinedOutput(); err != nil {
-				fmt.Fprintf(os.Stderr, "%s. %s\n", out, err)
-			}
-		}
+	if !isRootQdiscExist(device) {
+		args := fmt.Sprintf("tc qdisc add dev %s root handle 1: %s", device, qdisc)
+		execCmd(args)
 	}
 }
 

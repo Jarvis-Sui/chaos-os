@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os/exec"
 	"path"
+	"strings"
 
 	"encoding/json"
 
@@ -18,7 +19,7 @@ import (
 type faultfn func(*pflag.FlagSet) *b.Fault
 
 var faultCreateFns map[binding.FaultType]faultfn
-var binFile = path.Join(util.GetExecBinPath(), "nettc")
+var netTcBinFile = path.Join(util.GetExecBinPath(), "nettc")
 
 func init() {
 	faultCreateFns = map[binding.FaultType]faultfn{
@@ -71,6 +72,23 @@ func FaultDestroy(flags *pflag.FlagSet) {
 		logrus.WithFields(logrus.Fields{"err": err, "fault_id": id}).Error("failed to get fault")
 	} else {
 		logrus.WithField("fault", fault).Info("destroy fault")
+		var args string
+		if fault.Type == b.FT_NETLOSS || fault.Type == b.FT_NETDELAY {
+			classMinor := fault.Reason
+			device := getNetFaultInterface(fault)
+			args = fmt.Sprintf("%s destroy --class-minor %s --interface %s", netTcBinFile, classMinor, device)
+		}
+
+		cmd := exec.Command("bash", "-c", args)
+		if out, err := cmd.CombinedOutput(); err != nil {
+			table.UpdateFaultStatus(fault.Uid, string(b.FS_ERROR), fmt.Sprintf("%s. %s", out, err))
+			logrus.WithFields(logrus.Fields{"err": err, "fault": fault}).Error("failed to destroy fault")
+		} else {
+			if err := table.UpdateFaultStatus(fault.Uid, string(b.FS_DESTROYED), ""); err != nil {
+				logrus.WithFields(logrus.Fields{"err": err, "table": table.TableName}).Error("failed to update table")
+				return
+			}
+		}
 	}
 }
 
@@ -87,5 +105,5 @@ func FaultStatus(flags *pflag.FlagSet) {
 func execute(fault *b.Fault) (string, error) {
 	cc := exec.Command("bash", "-c", fault.Command)
 	out, err := cc.CombinedOutput()
-	return string(out), err
+	return strings.Trim(string(out), "\n"), err
 }
