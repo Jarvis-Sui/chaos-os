@@ -12,6 +12,7 @@ const (
 )
 
 const (
+	FS_UNSET     FaultStatus = ""
 	FS_READY     FaultStatus = "Ready"
 	FS_RUNNING   FaultStatus = "Running"
 	FS_ERROR     FaultStatus = "Error"

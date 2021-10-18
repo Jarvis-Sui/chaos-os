@@ -168,11 +168,23 @@ func (ft *FaultTable) GetFaultById(uid string) (*binding.Fault, error) {
 	}
 }
 
-func (ft *FaultTable) GetAllFaults() []*binding.Fault {
+func (ft *FaultTable) GetFaults(id string, status binding.FaultStatus, limit int) []*binding.Fault {
 	ft.Open()
 	defer ft.Close()
 
 	sql := fmt.Sprintf(`SELECT id, fault_type, command, status, reason, create_time, update_time FROM %s`, ft.TableName)
+
+	if id != "" {
+		sql += fmt.Sprintf(" WHERE id='%s'", id)
+	} else {
+		if status != binding.FS_UNSET {
+			sql += fmt.Sprintf(" WHERE status='%s'", status)
+		}
+		sql += " ORDER BY create_time DESC"
+		if limit != 0 {
+			sql += fmt.Sprintf(" LIMIT %d", limit)
+		}
+	}
 
 	faults := make([]*binding.Fault, 0)
 	if rows, err := ft.conn.Query(sql); err != nil {

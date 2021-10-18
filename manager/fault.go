@@ -93,8 +93,11 @@ func FaultDestroy(flags *pflag.FlagSet) {
 }
 
 func FaultStatus(flags *pflag.FlagSet) {
+	status, _ := flags.GetString("status")
+	id, _ := flags.GetString("id")
+	limit, _ := flags.GetInt("limit")
 	table := database.GetFaultTable()
-	faults := table.GetAllFaults()
+	faults := table.GetFaults(id, b.FaultStatus(status), limit)
 
 	for _, fault := range faults {
 		s, _ := json.Marshal(fault)

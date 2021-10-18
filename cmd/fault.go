@@ -41,8 +41,8 @@ func initFaultCmd() {
 		Run: status,
 	}
 	faultStatusCmd.Flags().StringVar(&id, "id", "", "fault id")
-	faultStatusCmd.Flags().StringVar(&state, "status", "", "status of faults to return")
-	faultStatusCmd.Flags().IntVar(&limit, "limit", 1, "maximum number of faults returned")
+	faultStatusCmd.Flags().StringVar(&state, "status", "", "status of faults to return. Ready | Running | Error | Destroyed")
+	faultStatusCmd.Flags().IntVar(&limit, "limit", 100, "maximum number of faults returned")
 
 	faultCmd.AddCommand(faultCreateCmd)
 	faultCmd.AddCommand(faultDestroyCmd)
