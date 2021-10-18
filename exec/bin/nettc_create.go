@@ -2,7 +2,12 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
+	"strconv"
+	"strings"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -11,6 +16,8 @@ var netemFn = map[string]func(*pflag.FlagSet) string{
 	"delay": netemDelay,
 	"loss":  netemLoss,
 }
+
+var qdisc = "htb"
 
 func initCreateCmd() *cobra.Command {
 	createCmd := &cobra.Command{
@@ -69,13 +76,21 @@ func initTcLossCmd() *cobra.Command {
 }
 
 func createTcRule(flags *pflag.FlagSet, netemType string) {
-	// 0. build netem parameters
-	// 1. check root qdisc exists
-	// 2. get avail next classid
-	// 3. add class, sub qdisc, filter
-	//
+	checkTcExists()
+
 	netem := netemFn[netemType](flags)
-	fmt.Println(netem)
+	device, _ := flags.GetString("interface")
+	destIp, _ := flags.GetString("dest-ip")
+	destPort, _ := flags.GetString("dest-port")
+
+	createRootQdiscIfNotExist(device)
+	classMinor := getNextClassMinor(device)
+
+	addClass(device, classMinor)
+	addSubQdisc(device, classMinor*10, classMinor, netem)
+	addFilter(device, classMinor, classMinor, destIp, destPort)
+	// class minor == filter prio == sub qdisc handle / 10, so caller can use it to find the newly added rule
+	fmt.Println(classMinor)
 }
 
 func netemDelay(flags *pflag.FlagSet) string {
@@ -90,4 +105,64 @@ func netemLoss(flags *pflag.FlagSet) string {
 	percent, _ := flags.GetInt("percent")
 	correlation, _ := flags.GetInt("correlation")
 	return fmt.Sprintf("netem loss random %d%% %d%%", percent, correlation)
+}
+
+func createRootQdiscIfNotExist(device string) {
+	args := fmt.Sprintf("tc qdisc ls dev %s | grep %s | wc -l", device, qdisc)
+	cmd := exec.Command("bash", "-c", args)
+	if out, err := cmd.CombinedOutput(); err != nil {
+		fmt.Fprintf(os.Stderr, "%s. %s\n", out, err)
+		os.Exit(1)
+	} else {
+		if v, _ := strconv.ParseInt(strings.Trim(string(out), "\n"), 10, 64); v == 0 {
+			args := fmt.Sprintf("tc qdisc add dev %s root handle 1: %s", device, qdisc)
+			cmd := exec.Command("bash", "-c", args)
+			if out, err := cmd.CombinedOutput(); err != nil {
+				fmt.Fprintf(os.Stderr, "%s. %s\n", out, err)
+			}
+		}
+	}
+}
+
+func getNextClassMinor(device string) int {
+	args := fmt.Sprintf("tc class ls dev %s | awk '{ print $3 }' | awk -F':' '{ print $2 }' | sort", device)
+	out := execCmd(args)
+	str := strings.Trim(out, "\n")
+	if str == "" {
+		return 1
+	}
+	existClasses := strings.Split(str, "\n")
+	for i, v := range existClasses {
+		intv, _ := strconv.ParseInt(v, 10, 64)
+		if i+1 < int(intv) {
+			return i + 1
+		}
+	}
+	return len(existClasses) + 1
+}
+
+func addClass(device string, classMinor int) {
+	args := fmt.Sprintf("tc class add dev %s classid 1:%d parent 1: htb rate 10000Mbps", device, classMinor)
+	execCmd(args)
+	logrus.WithFields(logrus.Fields{"interface": device, "class minor": classMinor}).Info("add new class")
+}
+
+func addSubQdisc(device string, handle int, parentClassMinor int, netem string) {
+	args := fmt.Sprintf("tc qdisc add dev %s handle %d: parent 1:%d %s", device, handle, parentClassMinor, netem)
+	execCmd(args)
+	logrus.WithFields(
+		logrus.Fields{"interface": device, "handle": handle, "class minor": parentClassMinor, "netem": netem},
+	).Info("add new sub qdisc")
+}
+
+func addFilter(device string, flowId int, prio int, destIp string, destPort string) {
+	args := fmt.Sprintf("tc filter add dev %s parent 1: prio %d protocol ip u32 match ip dst %s match ip dport %s 0xffff flowid 1:%d", device, prio, destIp, destPort, flowId)
+	execCmd(args)
+	logrus.WithFields(
+		logrus.Fields{"interface": device, "flow id": flowId, "prio": prio, "dest ip": destIp, "dest port": destPort},
+	).Info("add new filter")
+}
+
+func checkTcExists() {
+	execCmd("which tc")
 }
