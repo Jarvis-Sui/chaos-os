@@ -19,7 +19,7 @@ const (
 	FS_READY     FaultStatus = "Ready"
 	FS_RUNNING   FaultStatus = "Running"
 	FS_ERROR     FaultStatus = "Error"
-	FS_DESTROYED FaultStatus = "Destoyed"
+	FS_DESTROYED FaultStatus = "Destroyed"
 )
 
 type Fault struct {

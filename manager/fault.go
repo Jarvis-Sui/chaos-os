@@ -20,9 +20,11 @@ var netTcBinFile = path.Join(util.GetExecBinPath(), "nettc")
 
 func init() {
 	faultCreateFns = map[b.FaultType]faultfn{
-		b.FT_NETLOSS:    createNetworkLoss,
-		b.FT_NETDELAY:   createNetworkDelay,
-		b.FT_NETREORDER: createNetworkReorder,
+		b.FT_NETLOSS:      createNetworkLoss,
+		b.FT_NETDELAY:     createNetworkDelay,
+		b.FT_NETREORDER:   createNetworkReorder,
+		b.FT_NETDUPLICATE: createNetworkDuplicate,
+		b.FT_NETCORRUPT:   createNetworkCorrupt,
 	}
 
 }
@@ -80,7 +82,7 @@ func DestroyFault(flags *pflag.FlagSet) error {
 	} else {
 		logrus.WithField("fault", fault).Info("destroy fault")
 		var args string
-		if fault.Type == b.FT_NETLOSS || fault.Type == b.FT_NETDELAY || fault.Type == b.FT_NETREORDER {
+		if fault.Type == b.FT_NETLOSS || fault.Type == b.FT_NETDELAY || fault.Type == b.FT_NETREORDER || fault.Type == b.FT_NETDUPLICATE || fault.Type == b.FT_NETCORRUPT {
 			classMinor := fault.Reason
 			device := getNetFaultInterface(fault)
 			args = fmt.Sprintf("%s destroy --class-minor %s --interface %s", netTcBinFile, classMinor, device)

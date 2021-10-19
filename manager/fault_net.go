@@ -71,6 +71,42 @@ func createNetworkReorder(flags *pflag.FlagSet) *b.Fault {
 	return &fault
 }
 
+func createNetworkDuplicate(flags *pflag.FlagSet) *b.Fault {
+	timeout, _ := flags.GetInt("timeout")
+	commonArgs := fmt.Sprintf("%s create duplicate %s", netTcBinFile, buildNetCommonArgs(flags))
+
+	args := ""
+	flags.VisitAll(func(f *pflag.Flag) {
+		if f.Name == "percent" {
+			args += fmt.Sprintf("--percent %v ", f.Value)
+		} else if f.Name == "correlation" {
+			args += fmt.Sprintf("--correlation %v ", f.Value)
+		}
+	})
+
+	args = fmt.Sprintf("%s %s", commonArgs, args)
+	fault := b.Fault{Uid: uuid.NewString(), Type: b.FT_NETDUPLICATE, Status: b.FS_READY, Command: args, CreateTime: time.Now(), Timeout: timeout}
+	return &fault
+}
+
+func createNetworkCorrupt(flags *pflag.FlagSet) *b.Fault {
+	timeout, _ := flags.GetInt("timeout")
+	commonArgs := fmt.Sprintf("%s create corrupt %s", netTcBinFile, buildNetCommonArgs(flags))
+
+	args := ""
+	flags.VisitAll(func(f *pflag.Flag) {
+		if f.Name == "percent" {
+			args += fmt.Sprintf("--percent %v ", f.Value)
+		} else if f.Name == "correlation" {
+			args += fmt.Sprintf("--correlation %v ", f.Value)
+		}
+	})
+
+	args = fmt.Sprintf("%s %s", commonArgs, args)
+	fault := b.Fault{Uid: uuid.NewString(), Type: b.FT_NETCORRUPT, Status: b.FS_READY, Command: args, CreateTime: time.Now(), Timeout: timeout}
+	return &fault
+}
+
 func buildNetCommonArgs(flags *pflag.FlagSet) string {
 	args := ""
 	flags.VisitAll(func(f *pflag.Flag) {

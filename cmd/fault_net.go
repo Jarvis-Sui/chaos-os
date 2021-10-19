@@ -30,10 +30,14 @@ func initTcCmd() {
 	delayCmd := initTcDelayCmd()
 	lossCmd := initTcLossCmd()
 	reorderCmd := initTcReorderCmd()
+	dupCmd := initTcDuplicateCmd()
+	corruptCmd := initTcCorruptCmd()
 
 	tcCmd.AddCommand(delayCmd)
 	tcCmd.AddCommand(lossCmd)
 	tcCmd.AddCommand(reorderCmd)
+	tcCmd.AddCommand(dupCmd)
+	tcCmd.AddCommand(corruptCmd)
 }
 
 func initTcDelayCmd() *cobra.Command {
@@ -91,6 +95,38 @@ func initTcReorderCmd() *cobra.Command {
 	reorderCmd.MarkFlagRequired("percent")
 
 	return reorderCmd
+}
+
+func initTcDuplicateCmd() *cobra.Command {
+	dupCmd := &cobra.Command{
+		Use:   "duplicate",
+		Short: "duplication of packets",
+		Run: func(cmd *cobra.Command, args []string) {
+			addNetFault(binding.FT_NETDUPLICATE, cmd.Flags())
+		},
+	}
+	var percent, correlation int
+	dupCmd.Flags().IntVar(&percent, "percent", 0, "percent to reorder. int value.")
+	dupCmd.Flags().IntVar(&correlation, "correlation", 0, "correlation between packets")
+	dupCmd.MarkFlagRequired("percent")
+
+	return dupCmd
+}
+
+func initTcCorruptCmd() *cobra.Command {
+	corruptCmd := &cobra.Command{
+		Use:   "corrupt",
+		Short: "corruption of packets",
+		Run: func(cmd *cobra.Command, args []string) {
+			addNetFault(binding.FT_NETCORRUPT, cmd.Flags())
+		},
+	}
+	var percent, correlation int
+	corruptCmd.Flags().IntVar(&percent, "percent", 0, "percent to reorder. int value.")
+	corruptCmd.Flags().IntVar(&correlation, "correlation", 0, "correlation between packets")
+	corruptCmd.MarkFlagRequired("percent")
+
+	return corruptCmd
 }
 
 func addNetFault(ft binding.FaultType, flags *pflag.FlagSet) {
