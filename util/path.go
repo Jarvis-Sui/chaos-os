@@ -21,7 +21,7 @@ func GetRootPath() string {
 
 func GetDBFilePath() string {
 	dir := GetRootPath()
-	return filepath.Join(dir, "chaosos.dat")
+	return filepath.Join(dir, "chaos-os.dat")
 }
 
 func GetExecBinPath() string {

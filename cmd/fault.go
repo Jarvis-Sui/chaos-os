@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"github.com/Jarvis-Sui/chaos-os/manager"
 	"github.com/spf13/cobra"
 )
@@ -50,9 +53,13 @@ func initFaultCmd() {
 }
 
 func destroy(cmd *cobra.Command, args []string) {
-	manager.FaultDestroy(cmd.Flags())
+	manager.DestroyFault(cmd.Flags())
 }
 
 func status(cmd *cobra.Command, args []string) {
-	manager.FaultStatus(cmd.Flags())
+	faults := manager.FaultStatus(cmd.Flags())
+	for _, fault := range faults {
+		s, _ := json.Marshal(fault)
+		fmt.Printf("%s\n", s)
+	}
 }

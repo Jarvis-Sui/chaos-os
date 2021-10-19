@@ -24,6 +24,7 @@ type Fault struct {
 	Type       FaultType   `json:"type"`
 	Status     FaultStatus `json:"status"`
 	Command    string      `json:"command"`
+	Timeout    int         `json:"timeout"`
 	Reason     string      `json:"reason"`
 	CreateTime time.Time   `json:"create_time"`
 	UpdateTime time.Time   `json:"update_time"`

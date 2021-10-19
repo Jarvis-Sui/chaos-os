@@ -11,6 +11,7 @@ import (
 )
 
 func createNetworkDelay(flags *pflag.FlagSet) *b.Fault {
+	timeout, _ := flags.GetInt("timeout")
 	commonArgs := fmt.Sprintf("%s create delay %s", netTcBinFile, buildNetCommonArgs(flags))
 
 	args := ""
@@ -27,11 +28,12 @@ func createNetworkDelay(flags *pflag.FlagSet) *b.Fault {
 	})
 
 	args = fmt.Sprintf("%s %s", commonArgs, args)
-	fault := b.Fault{Uid: uuid.NewString(), Type: b.FT_NETDELAY, Status: b.FS_READY, Command: args, CreateTime: time.Now()}
+	fault := b.Fault{Uid: uuid.NewString(), Type: b.FT_NETDELAY, Status: b.FS_READY, Command: args, CreateTime: time.Now(), Timeout: timeout}
 	return &fault
 }
 
 func createNetworkLoss(flags *pflag.FlagSet) *b.Fault {
+	timeout, _ := flags.GetInt("timeout")
 	commonArgs := fmt.Sprintf("%s create loss %s", netTcBinFile, buildNetCommonArgs(flags))
 	args := ""
 	flags.VisitAll(func(f *pflag.Flag) {
@@ -43,7 +45,7 @@ func createNetworkLoss(flags *pflag.FlagSet) *b.Fault {
 	})
 
 	args = fmt.Sprintf("%s %s", commonArgs, args)
-	fault := b.Fault{Uid: uuid.NewString(), Type: b.FT_NETLOSS, Status: b.FS_READY, Command: args, CreateTime: time.Now()}
+	fault := b.Fault{Uid: uuid.NewString(), Type: b.FT_NETLOSS, Status: b.FS_READY, Command: args, CreateTime: time.Now(), Timeout: timeout}
 	return &fault
 }
 

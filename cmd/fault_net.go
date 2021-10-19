@@ -1,9 +1,14 @@
 package cmd
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"github.com/Jarvis-Sui/chaos-os/binding"
 	"github.com/Jarvis-Sui/chaos-os/manager"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 var tcCmd *cobra.Command
@@ -33,7 +38,7 @@ func initTcDelayCmd() *cobra.Command {
 	delayCmd := &cobra.Command{
 		Use: "delay",
 		Run: func(cmd *cobra.Command, args []string) {
-			manager.FaultCreate(binding.FT_NETDELAY, cmd.Flags())
+			addNetFault(binding.FT_NETDELAY, cmd.Flags())
 		},
 	}
 
@@ -53,7 +58,7 @@ func initTcLossCmd() *cobra.Command {
 		Use:   "loss",
 		Short: "random loss of packets",
 		Run: func(cmd *cobra.Command, args []string) {
-			manager.FaultCreate(binding.FT_NETLOSS, cmd.Flags())
+			addNetFault(binding.FT_NETLOSS, cmd.Flags())
 		},
 	}
 
@@ -63,4 +68,19 @@ func initTcLossCmd() *cobra.Command {
 
 	lossCmd.MarkFlagRequired("percent")
 	return lossCmd
+}
+
+func addNetFault(ft binding.FaultType, flags *pflag.FlagSet) {
+	if fault, err := manager.InitFault(ft, flags); err != nil {
+		logrus.WithFields(logrus.Fields{"err": err, "fault": fault}).Error("failed to add fault")
+		fmt.Printf("failed to add: %s\n", err)
+	} else {
+		if err := manager.CreateFault(fault); err != nil {
+			logrus.WithFields(logrus.Fields{"err": err, "fault": fault}).Error("failed to add fault")
+			fmt.Printf("failed to add: %s\n", err)
+		} else {
+			s, _ := json.Marshal(fault)
+			fmt.Println(string(s))
+		}
+	}
 }

@@ -51,6 +51,7 @@ func initFaultTable() {
 		fault_type 		TEXT,
 		command 		TEXT,
 		status  		TEXT,
+		timeout 		INT,
 		reason 			TEXT,
 		create_time  	TEXT,
 		update_time  	TEXT
@@ -115,9 +116,9 @@ func (ft *FaultTable) AddFault(fault *binding.Fault) error {
 
 	sql := fmt.Sprintf(`
 		INSERT INTO %s
-		(id, action, fault_type, command, status, create_time, update_time)
+		(id, action, fault_type, command, status, timeout, create_time, update_time)
 		VALUES
-		(?, ?, ?, ?, ?, ?, ?)
+		(?, ?, ?, ?, ?, ?, ?, ?)
 	`, ft.TableName)
 
 	stmt, err := ft.conn.Prepare(sql)
@@ -125,7 +126,7 @@ func (ft *FaultTable) AddFault(fault *binding.Fault) error {
 		return err
 	}
 
-	_, err = stmt.Exec(fault.Uid, "Create", fault.Type, fault.Command, fault.Status, fault.CreateTime, time.Now())
+	_, err = stmt.Exec(fault.Uid, "Create", fault.Type, fault.Command, fault.Status, fault.Timeout, fault.CreateTime, time.Now())
 	return err
 }
 
@@ -148,7 +149,7 @@ func (ft *FaultTable) GetFaultById(uid string) (*binding.Fault, error) {
 	ft.Open()
 	defer ft.Close()
 
-	sql := fmt.Sprintf(`SELECT id, fault_type, command, status, reason, create_time, update_time FROM %s WHERE id=?`, ft.TableName)
+	sql := fmt.Sprintf(`SELECT id, fault_type, command, status, timeout, reason, create_time, update_time FROM %s WHERE id=?`, ft.TableName)
 	stmt, err := ft.conn.Prepare(sql)
 	if err != nil {
 		return nil, err
@@ -172,7 +173,7 @@ func (ft *FaultTable) GetFaults(id string, status binding.FaultStatus, limit int
 	ft.Open()
 	defer ft.Close()
 
-	sql := fmt.Sprintf(`SELECT id, fault_type, command, status, reason, create_time, update_time FROM %s`, ft.TableName)
+	sql := fmt.Sprintf(`SELECT id, fault_type, command, status, timeout, reason, create_time, update_time FROM %s`, ft.TableName)
 
 	if id != "" {
 		sql += fmt.Sprintf(" WHERE id='%s'", id)
@@ -202,12 +203,13 @@ func rowToFault(rows *sql.Rows) (*binding.Fault, error) {
 	var uid string
 	var ftype binding.FaultType
 	var status binding.FaultStatus
+	var timeout int
 	var command string
 	var reason string
 	var createTime string
 	var updateTime string
 
-	if err := rows.Scan(&uid, &ftype, &command, &status, &reason, &createTime, &updateTime); err != nil {
+	if err := rows.Scan(&uid, &ftype, &command, &status, &timeout, &reason, &createTime, &updateTime); err != nil {
 		return nil, err
 	}
 
@@ -217,6 +219,7 @@ func rowToFault(rows *sql.Rows) (*binding.Fault, error) {
 		Status:     status,
 		Command:    command,
 		Reason:     reason,
+		Timeout:    timeout,
 		CreateTime: dateparse.MustParse(createTime),
 		UpdateTime: dateparse.MustParse(updateTime),
 	}

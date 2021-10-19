@@ -15,7 +15,9 @@ func init() {
 	}
 
 	initFaultCmd()
+	initServerCmd()
 	rootCmd.AddCommand(faultCmd)
+	rootCmd.AddCommand(serverCmd)
 }
 
 func Exec() {
