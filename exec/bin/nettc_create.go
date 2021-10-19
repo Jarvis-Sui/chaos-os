@@ -11,9 +11,11 @@ import (
 )
 
 var netemFn = map[string]func(*pflag.FlagSet) string{
-	"delay":   netemDelay,
-	"loss":    netemLoss,
-	"reorder": netemReorder,
+	"delay":     netemDelay,
+	"loss":      netemLoss,
+	"reorder":   netemReorder,
+	"duplicate": netemDuplicate,
+	"corrupt":   netemCorrupt,
 }
 
 func initCreateCmd() *cobra.Command {
@@ -32,9 +34,14 @@ func initCreateCmd() *cobra.Command {
 	delayCmd := initTcDelayCmd()
 	lossCmd := initTcLossCmd()
 	reorderCmd := initTcReorderCmd()
+	dupCmd := initTcDuplicateCmd()
+	corruptCmd := initTcCorruptCmd()
+
 	createCmd.AddCommand(delayCmd)
 	createCmd.AddCommand(lossCmd)
 	createCmd.AddCommand(reorderCmd)
+	createCmd.AddCommand(dupCmd)
+	createCmd.AddCommand(corruptCmd)
 	return createCmd
 }
 
@@ -94,6 +101,40 @@ func initTcReorderCmd() *cobra.Command {
 	return reorderCmd
 }
 
+func initTcDuplicateCmd() *cobra.Command {
+	dupCmd := &cobra.Command{
+		Use:   "duplicate",
+		Short: "duplication of packets",
+		Run: func(cmd *cobra.Command, args []string) {
+			createTcRule(cmd.Flags(), "duplicate")
+		},
+	}
+
+	var percent, correlation int
+	dupCmd.Flags().IntVar(&percent, "percent", 0, "percent to reorder. int value.")
+	dupCmd.Flags().IntVar(&correlation, "correlation", 0, "correlation between packets")
+
+	dupCmd.MarkFlagRequired("percent")
+	return dupCmd
+}
+
+func initTcCorruptCmd() *cobra.Command {
+	corruptCmd := &cobra.Command{
+		Use:   "corrupt",
+		Short: "corrupt of packets",
+		Run: func(cmd *cobra.Command, args []string) {
+			createTcRule(cmd.Flags(), "corrupt")
+		},
+	}
+
+	var percent, correlation int
+	corruptCmd.Flags().IntVar(&percent, "percent", 0, "percent to reorder. int value.")
+	corruptCmd.Flags().IntVar(&correlation, "correlation", 0, "correlation between packets")
+
+	corruptCmd.MarkFlagRequired("percent")
+	return corruptCmd
+}
+
 func createTcRule(flags *pflag.FlagSet, netemType string) {
 	checkTcExists()
 
@@ -136,6 +177,20 @@ func netemReorder(flags *pflag.FlagSet) string {
 		ret = fmt.Sprintf("%s gap %d", ret, distance)
 	}
 	return ret
+}
+
+func netemDuplicate(flags *pflag.FlagSet) string {
+	percent, _ := flags.GetInt("percent")
+	correlation, _ := flags.GetInt("correlation")
+
+	return fmt.Sprintf("netem duplicate %d%% %d%%", percent, correlation)
+}
+
+func netemCorrupt(flags *pflag.FlagSet) string {
+	percent, _ := flags.GetInt("percent")
+	correlation, _ := flags.GetInt("correlation")
+
+	return fmt.Sprintf("netem corrupt %d%% %d%%", percent, correlation)
 }
 
 func createRootQdiscIfNotExist(device string) {
