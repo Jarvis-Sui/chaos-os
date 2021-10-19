@@ -29,9 +29,11 @@ func initTcCmd() {
 
 	delayCmd := initTcDelayCmd()
 	lossCmd := initTcLossCmd()
+	reorderCmd := initTcReorderCmd()
 
 	tcCmd.AddCommand(delayCmd)
 	tcCmd.AddCommand(lossCmd)
+	tcCmd.AddCommand(reorderCmd)
 }
 
 func initTcDelayCmd() *cobra.Command {
@@ -68,6 +70,27 @@ func initTcLossCmd() *cobra.Command {
 
 	lossCmd.MarkFlagRequired("percent")
 	return lossCmd
+}
+
+func initTcReorderCmd() *cobra.Command {
+	reorderCmd := &cobra.Command{
+		Use:   "reorder",
+		Short: "reorder of packets",
+		Run: func(cmd *cobra.Command, args []string) {
+			addNetFault(binding.FT_NETREORDER, cmd.Flags())
+		},
+	}
+
+	var delay, percent, correlation, distance int
+	reorderCmd.Flags().IntVar(&delay, "delay", 0, "ms time to delay")
+	reorderCmd.Flags().IntVar(&percent, "percent", 0, "percent to reorder. int value.")
+	reorderCmd.Flags().IntVar(&correlation, "correlation", 0, "correlation between packets")
+	reorderCmd.Flags().IntVar(&distance, "distance", 0, "gap")
+
+	reorderCmd.MarkFlagRequired("delay")
+	reorderCmd.MarkFlagRequired("percent")
+
+	return reorderCmd
 }
 
 func addNetFault(ft binding.FaultType, flags *pflag.FlagSet) {

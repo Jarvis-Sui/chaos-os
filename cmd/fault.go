@@ -53,7 +53,9 @@ func initFaultCmd() {
 }
 
 func destroy(cmd *cobra.Command, args []string) {
-	manager.DestroyFault(cmd.Flags())
+	if err := manager.DestroyFault(cmd.Flags()); err != nil {
+		fmt.Printf("failed to destroy: %s\n", err)
+	}
 }
 
 func status(cmd *cobra.Command, args []string) {

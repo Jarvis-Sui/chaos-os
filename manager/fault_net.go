@@ -49,6 +49,28 @@ func createNetworkLoss(flags *pflag.FlagSet) *b.Fault {
 	return &fault
 }
 
+func createNetworkReorder(flags *pflag.FlagSet) *b.Fault {
+	timeout, _ := flags.GetInt("timeout")
+	commonArgs := fmt.Sprintf("%s create reorder %s", netTcBinFile, buildNetCommonArgs(flags))
+
+	args := ""
+	flags.VisitAll(func(f *pflag.Flag) {
+		if f.Name == "delay" {
+			args += fmt.Sprintf("--delay %v ", f.Value)
+		} else if f.Name == "percent" {
+			args += fmt.Sprintf("--percent %v ", f.Value)
+		} else if f.Name == "correlation" {
+			args += fmt.Sprintf("--correlation %v ", f.Value)
+		} else if f.Name == "distance" {
+			args += fmt.Sprintf("--distance %v ", f.Value)
+		}
+	})
+
+	args = fmt.Sprintf("%s %s", commonArgs, args)
+	fault := b.Fault{Uid: uuid.NewString(), Type: b.FT_NETREORDER, Status: b.FS_READY, Command: args, CreateTime: time.Now(), Timeout: timeout}
+	return &fault
+}
+
 func buildNetCommonArgs(flags *pflag.FlagSet) string {
 	args := ""
 	flags.VisitAll(func(f *pflag.Flag) {

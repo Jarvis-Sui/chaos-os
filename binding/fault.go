@@ -6,9 +6,10 @@ type FaultType string
 type FaultStatus string
 
 const (
-	FT_UNSET    FaultType = ""
-	FT_NETDELAY FaultType = "net_delay"
-	FT_NETLOSS  FaultType = "net_loss"
+	FT_UNSET      FaultType = ""
+	FT_NETDELAY   FaultType = "net_delay"
+	FT_NETLOSS    FaultType = "net_loss"
+	FT_NETREORDER FaultType = "net_reorder"
 )
 
 const (

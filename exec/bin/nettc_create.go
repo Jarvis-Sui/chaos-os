@@ -11,8 +11,9 @@ import (
 )
 
 var netemFn = map[string]func(*pflag.FlagSet) string{
-	"delay": netemDelay,
-	"loss":  netemLoss,
+	"delay":   netemDelay,
+	"loss":    netemLoss,
+	"reorder": netemReorder,
 }
 
 func initCreateCmd() *cobra.Command {
@@ -30,8 +31,10 @@ func initCreateCmd() *cobra.Command {
 
 	delayCmd := initTcDelayCmd()
 	lossCmd := initTcLossCmd()
+	reorderCmd := initTcReorderCmd()
 	createCmd.AddCommand(delayCmd)
 	createCmd.AddCommand(lossCmd)
+	createCmd.AddCommand(reorderCmd)
 	return createCmd
 }
 
@@ -71,6 +74,26 @@ func initTcLossCmd() *cobra.Command {
 	return lossCmd
 }
 
+func initTcReorderCmd() *cobra.Command {
+	reorderCmd := &cobra.Command{
+		Use:   "reorder",
+		Short: "reorder of packets",
+		Run: func(cmd *cobra.Command, args []string) {
+			createTcRule(cmd.Flags(), "reorder")
+		},
+	}
+	var delay, percent, correlation, distance int
+	reorderCmd.Flags().IntVar(&delay, "delay", 0, "ms time to delay")
+	reorderCmd.Flags().IntVar(&percent, "percent", 0, "percent to reorder. int value.")
+	reorderCmd.Flags().IntVar(&correlation, "correlation", 0, "correlation between packets")
+	reorderCmd.Flags().IntVar(&distance, "distance", 0, "gap")
+
+	reorderCmd.MarkFlagRequired("delay")
+	reorderCmd.MarkFlagRequired("percent")
+
+	return reorderCmd
+}
+
 func createTcRule(flags *pflag.FlagSet, netemType string) {
 	checkTcExists()
 
@@ -101,6 +124,18 @@ func netemLoss(flags *pflag.FlagSet) string {
 	percent, _ := flags.GetInt("percent")
 	correlation, _ := flags.GetInt("correlation")
 	return fmt.Sprintf("netem loss random %d%% %d%%", percent, correlation)
+}
+
+func netemReorder(flags *pflag.FlagSet) string {
+	delay, _ := flags.GetInt("delay")
+	percent, _ := flags.GetInt("percent")
+	correlation, _ := flags.GetInt("correlation")
+	distance, _ := flags.GetInt("distance")
+	ret := fmt.Sprintf("netem delay %dms reorder %d%% %d%%", delay, percent, correlation)
+	if distance != 0 {
+		ret = fmt.Sprintf("%s gap %d", ret, distance)
+	}
+	return ret
 }
 
 func createRootQdiscIfNotExist(device string) {
