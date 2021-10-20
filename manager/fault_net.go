@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/pflag"
 )
 
-func createNetworkDelay(flags *pflag.FlagSet) *b.Fault {
+func initNetworkDelay(flags *pflag.FlagSet) *b.Fault {
 	timeout, _ := flags.GetInt("timeout")
 	commonArgs := fmt.Sprintf("%s create delay %s", netTcBinFile, buildNetCommonArgs(flags))
 
@@ -32,7 +32,7 @@ func createNetworkDelay(flags *pflag.FlagSet) *b.Fault {
 	return &fault
 }
 
-func createNetworkLoss(flags *pflag.FlagSet) *b.Fault {
+func initNetworkLoss(flags *pflag.FlagSet) *b.Fault {
 	timeout, _ := flags.GetInt("timeout")
 	commonArgs := fmt.Sprintf("%s create loss %s", netTcBinFile, buildNetCommonArgs(flags))
 	args := ""
@@ -49,7 +49,7 @@ func createNetworkLoss(flags *pflag.FlagSet) *b.Fault {
 	return &fault
 }
 
-func createNetworkReorder(flags *pflag.FlagSet) *b.Fault {
+func initNetworkReorder(flags *pflag.FlagSet) *b.Fault {
 	timeout, _ := flags.GetInt("timeout")
 	commonArgs := fmt.Sprintf("%s create reorder %s", netTcBinFile, buildNetCommonArgs(flags))
 
@@ -71,7 +71,7 @@ func createNetworkReorder(flags *pflag.FlagSet) *b.Fault {
 	return &fault
 }
 
-func createNetworkDuplicate(flags *pflag.FlagSet) *b.Fault {
+func initNetworkDuplicate(flags *pflag.FlagSet) *b.Fault {
 	timeout, _ := flags.GetInt("timeout")
 	commonArgs := fmt.Sprintf("%s create duplicate %s", netTcBinFile, buildNetCommonArgs(flags))
 
@@ -89,7 +89,7 @@ func createNetworkDuplicate(flags *pflag.FlagSet) *b.Fault {
 	return &fault
 }
 
-func createNetworkCorrupt(flags *pflag.FlagSet) *b.Fault {
+func initNetworkCorrupt(flags *pflag.FlagSet) *b.Fault {
 	timeout, _ := flags.GetInt("timeout")
 	commonArgs := fmt.Sprintf("%s create corrupt %s", netTcBinFile, buildNetCommonArgs(flags))
 

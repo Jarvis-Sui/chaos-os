@@ -6,6 +6,7 @@ Chaos experiment for on-prem.
 ## Add fault
 ```
 ./chaos-os fault create network loss -i bond0 --timeout 10 --dest-ip 11.167.254.40 --dest-port 8000 --percent 100
+./chaos-os fault create process pause --pattern test_proc --timeout 10
 ./chaos-os fault destroy --id aae1e0a5-ec39-469e-8248-cfe454c0bc1b
 ```
 

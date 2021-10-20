@@ -18,7 +18,7 @@ var netemFn = map[string]func(*pflag.FlagSet) string{
 	"corrupt":   netemCorrupt,
 }
 
-func initCreateCmd() *cobra.Command {
+func initTCCreateCmd() *cobra.Command {
 	createCmd := &cobra.Command{
 		Use: "create",
 	}

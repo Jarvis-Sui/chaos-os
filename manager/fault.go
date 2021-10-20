@@ -15,16 +15,18 @@ import (
 
 type faultfn func(*pflag.FlagSet) *b.Fault
 
-var faultCreateFns map[b.FaultType]faultfn
+var faultInitFns map[b.FaultType]faultfn
 var netTcBinFile = path.Join(util.GetExecBinPath(), "nettc")
+var procBinFile = path.Join(util.GetExecBinPath(), "process")
 
 func init() {
-	faultCreateFns = map[b.FaultType]faultfn{
-		b.FT_NETLOSS:      createNetworkLoss,
-		b.FT_NETDELAY:     createNetworkDelay,
-		b.FT_NETREORDER:   createNetworkReorder,
-		b.FT_NETDUPLICATE: createNetworkDuplicate,
-		b.FT_NETCORRUPT:   createNetworkCorrupt,
+	faultInitFns = map[b.FaultType]faultfn{
+		b.FT_NETLOSS:      initNetworkLoss,
+		b.FT_NETDELAY:     initNetworkDelay,
+		b.FT_NETREORDER:   initNetworkReorder,
+		b.FT_NETDUPLICATE: initNetworkDuplicate,
+		b.FT_NETCORRUPT:   initNetworkCorrupt,
+		b.FT_PROCPAUSE:    initProcessPause,
 	}
 
 }
@@ -35,12 +37,11 @@ func InitFault(ft b.FaultType, flags *pflag.FlagSet) (*b.Fault, error) {
 		logrus.Error("timeout parameter not set")
 		return nil, err
 	}
-	fault := faultCreateFns[ft](flags)
+	fault := faultInitFns[ft](flags)
 	return fault, nil
 }
 
 func CreateFault(fault *b.Fault) error {
-
 	table := database.GetFaultTable()
 	if err := table.AddFault(fault); err != nil {
 		logrus.WithField("err", err).Errorf("failed to add an item to table %s", table.TableName)
@@ -64,7 +65,7 @@ func CreateFault(fault *b.Fault) error {
 			}
 		} else {
 			table.UpdateFaultStatus(fault.Uid, string(b.FS_ERROR), fmt.Sprintf("%s. %s", out, err))
-			logrus.WithFields(logrus.Fields{"err": err, "fault": fault}).Error("failed to execute fault")
+			logrus.WithFields(logrus.Fields{"out": out, "err": err, "fault": fault}).Error("failed to execute fault")
 			return err
 		}
 	}
@@ -86,6 +87,9 @@ func DestroyFault(flags *pflag.FlagSet) error {
 			classMinor := fault.Reason
 			device := getNetFaultInterface(fault)
 			args = fmt.Sprintf("%s destroy --class-minor %s --interface %s", netTcBinFile, classMinor, device)
+		} else if fault.Type == b.FT_PROCPAUSE {
+			pids := fault.Reason
+			args = fmt.Sprintf("%s destroy --pid %s", procBinFile, pids)
 		} else {
 			logrus.WithField("type", fault.Type).Error("fault type not supported")
 			return fmt.Errorf("fault type %s not supported", fault.Type)

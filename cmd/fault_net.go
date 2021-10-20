@@ -1,14 +1,8 @@
 package cmd
 
 import (
-	"encoding/json"
-	"fmt"
-
 	"github.com/Jarvis-Sui/chaos-os/binding"
-	"github.com/Jarvis-Sui/chaos-os/manager"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 )
 
 var tcCmd *cobra.Command
@@ -44,7 +38,7 @@ func initTcDelayCmd() *cobra.Command {
 	delayCmd := &cobra.Command{
 		Use: "delay",
 		Run: func(cmd *cobra.Command, args []string) {
-			addNetFault(binding.FT_NETDELAY, cmd.Flags())
+			addFault(binding.FT_NETDELAY, cmd.Flags())
 		},
 	}
 
@@ -64,7 +58,7 @@ func initTcLossCmd() *cobra.Command {
 		Use:   "loss",
 		Short: "random loss of packets",
 		Run: func(cmd *cobra.Command, args []string) {
-			addNetFault(binding.FT_NETLOSS, cmd.Flags())
+			addFault(binding.FT_NETLOSS, cmd.Flags())
 		},
 	}
 
@@ -81,7 +75,7 @@ func initTcReorderCmd() *cobra.Command {
 		Use:   "reorder",
 		Short: "reorder of packets",
 		Run: func(cmd *cobra.Command, args []string) {
-			addNetFault(binding.FT_NETREORDER, cmd.Flags())
+			addFault(binding.FT_NETREORDER, cmd.Flags())
 		},
 	}
 
@@ -102,7 +96,7 @@ func initTcDuplicateCmd() *cobra.Command {
 		Use:   "duplicate",
 		Short: "duplication of packets",
 		Run: func(cmd *cobra.Command, args []string) {
-			addNetFault(binding.FT_NETDUPLICATE, cmd.Flags())
+			addFault(binding.FT_NETDUPLICATE, cmd.Flags())
 		},
 	}
 	var percent, correlation int
@@ -118,7 +112,7 @@ func initTcCorruptCmd() *cobra.Command {
 		Use:   "corrupt",
 		Short: "corruption of packets",
 		Run: func(cmd *cobra.Command, args []string) {
-			addNetFault(binding.FT_NETCORRUPT, cmd.Flags())
+			addFault(binding.FT_NETCORRUPT, cmd.Flags())
 		},
 	}
 	var percent, correlation int
@@ -127,19 +121,4 @@ func initTcCorruptCmd() *cobra.Command {
 	corruptCmd.MarkFlagRequired("percent")
 
 	return corruptCmd
-}
-
-func addNetFault(ft binding.FaultType, flags *pflag.FlagSet) {
-	if fault, err := manager.InitFault(ft, flags); err != nil {
-		logrus.WithFields(logrus.Fields{"err": err, "fault": fault}).Error("failed to add fault")
-		fmt.Printf("failed to add: %s\n", err)
-	} else {
-		if err := manager.CreateFault(fault); err != nil {
-			logrus.WithFields(logrus.Fields{"err": err, "fault": fault}).Error("failed to add fault")
-			fmt.Printf("failed to add: %s\n", err)
-		} else {
-			s, _ := json.Marshal(fault)
-			fmt.Println(string(s))
-		}
-	}
 }

@@ -12,6 +12,8 @@ const (
 	FT_NETREORDER   FaultType = "net_reorder"
 	FT_NETDUPLICATE FaultType = "net_duplicate"
 	FT_NETCORRUPT   FaultType = "net_corrupt"
+
+	FT_PROCPAUSE FaultType = "proc_pause"
 )
 
 const (

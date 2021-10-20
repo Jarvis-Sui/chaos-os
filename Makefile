@@ -12,10 +12,13 @@ prebuild:
 	rm -rf $(BUILD_TARGET)
 	mkdir -p $(BUILD_TARGET)
 
-build_bin: build_nettc
+build_bin: build_nettc build_proc
 
-build_nettc: exec/bin/nettc.go exec/bin/nettc_create.go exec/bin/util.go
+build_nettc: exec/bin/nettc/nettc.go exec/bin/nettc/nettc_create.go exec/bin/nettc/util.go
 	$(GO) build $(GO_FLAGS) -o $(BUILD_TARGET_BIN)/nettc $^
+
+build_proc: exec/bin/process/process.go
+	$(GO) build $(GO_FLAGS) -o $(BUILD_TARGET_BIN)/process $^
 
 build_main: main.go
 	$(GO) build $(GO_FLAGS) -o $(BUILD_TARGET_PKG)/$(BIN) $<

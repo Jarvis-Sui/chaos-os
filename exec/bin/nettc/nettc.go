@@ -75,7 +75,7 @@ func main() {
 		Use: "nettc",
 	}
 
-	createCmd := initCreateCmd()
+	createCmd := initTCCreateCmd()
 
 	destroyCmd := &cobra.Command{
 		Use: "destroy",
