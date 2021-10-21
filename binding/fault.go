@@ -14,6 +14,8 @@ const (
 	FT_NETCORRUPT   FaultType = "net_corrupt"
 
 	FT_PROCPAUSE FaultType = "proc_pause"
+
+	FT_CPUSTRESS FaultType = "stress_cpu"
 )
 
 const (

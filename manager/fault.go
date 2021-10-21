@@ -18,6 +18,7 @@ type faultfn func(*pflag.FlagSet) *b.Fault
 var faultInitFns map[b.FaultType]faultfn
 var netTcBinFile = path.Join(util.GetExecBinPath(), "nettc")
 var procBinFile = path.Join(util.GetExecBinPath(), "process")
+var cpuBinFile = path.Join(util.GetExecBinPath(), "cpu")
 
 func init() {
 	faultInitFns = map[b.FaultType]faultfn{
@@ -27,6 +28,7 @@ func init() {
 		b.FT_NETDUPLICATE: initNetworkDuplicate,
 		b.FT_NETCORRUPT:   initNetworkCorrupt,
 		b.FT_PROCPAUSE:    initProcessPause,
+		b.FT_CPUSTRESS:    initCPUStress,
 	}
 
 }
@@ -90,6 +92,9 @@ func DestroyFault(flags *pflag.FlagSet) error {
 		} else if fault.Type == b.FT_PROCPAUSE {
 			pids := fault.Reason
 			args = fmt.Sprintf("%s destroy --pid %s", procBinFile, pids)
+		} else if fault.Type == b.FT_CPUSTRESS {
+			pid := fault.Reason
+			args = fmt.Sprintf("%s destroy --pid %s", cpuBinFile, pid)
 		} else {
 			logrus.WithField("type", fault.Type).Error("fault type not supported")
 			return fmt.Errorf("fault type %s not supported", fault.Type)

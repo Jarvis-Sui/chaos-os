@@ -29,6 +29,12 @@ func main() {
 
 	rootCmd.AddCommand(initCreateCmd())
 	rootCmd.AddCommand(initDestroyCmd())
+
+	rootCmd.SetFlagErrorFunc(func(cmd *cobra.Command, err error) error {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
+		return nil
+	})
 	rootCmd.Execute()
 }
 

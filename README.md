@@ -1,4 +1,4 @@
-Chaos experiment for on-prem.
+Chaos experiment for physical machine.
 
 
 # How to use
@@ -22,3 +22,9 @@ curl -G -X PUT "localhost:12345/fault" --data-urlencode "cmd=network loss -i bon
 curl -X GET "localhost:12345/fault/status?id=46339f2f-ae1d-40b7-b9f4-ed08d8a7e71b"
 curl -X DELETE "localhost:12345/fault?id=46339f2f-ae1d-40b7-b9f4-ed08d8a7e71b"
 ```
+
+
+# dependencies
+
+1. [stress-ng](https://github.com/ColinIanKing/stress-ng). for centos 7 by default. for other OS, please build it
+
