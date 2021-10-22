@@ -31,10 +31,12 @@ func initFaultCmd() {
 	initTcCmd()
 	initProcCmd()
 	initCpuCmd()
+	initMemCmd()
 
 	faultCreateCmd.AddCommand(tcCmd)
 	faultCreateCmd.AddCommand(procCmd)
 	faultCreateCmd.AddCommand(cpuCmd)
+	faultCreateCmd.AddCommand(memCmd)
 
 	var id string
 	faultDestroyCmd := &cobra.Command{

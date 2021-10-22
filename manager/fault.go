@@ -19,6 +19,7 @@ var faultInitFns map[b.FaultType]faultfn
 var netTcBinFile = path.Join(util.GetExecBinPath(), "nettc")
 var procBinFile = path.Join(util.GetExecBinPath(), "process")
 var cpuBinFile = path.Join(util.GetExecBinPath(), "cpu")
+var memBinFile = path.Join(util.GetExecBinPath(), "memory")
 
 func init() {
 	faultInitFns = map[b.FaultType]faultfn{
@@ -29,6 +30,7 @@ func init() {
 		b.FT_NETCORRUPT:   initNetworkCorrupt,
 		b.FT_PROCPAUSE:    initProcessPause,
 		b.FT_CPUSTRESS:    initCPUStress,
+		b.FT_MEMSTRESS:    initMemStress,
 	}
 
 }
@@ -92,7 +94,7 @@ func DestroyFault(flags *pflag.FlagSet) error {
 		} else if fault.Type == b.FT_PROCPAUSE {
 			pids := fault.Reason
 			args = fmt.Sprintf("%s destroy --pid %s", procBinFile, pids)
-		} else if fault.Type == b.FT_CPUSTRESS {
+		} else if fault.Type == b.FT_CPUSTRESS || fault.Type == b.FT_MEMSTRESS {
 			pid := fault.Reason
 			args = fmt.Sprintf("%s destroy --pid %s", cpuBinFile, pid)
 		} else {
