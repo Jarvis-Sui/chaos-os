@@ -65,6 +65,7 @@ func startServer(cmd *cobra.Command, args []string) {
 	e.Use(middleware.Recover())
 
 	e.GET("/fault/status", handler.GetFaults)
+	e.GET("/fault/status/:id", handler.GetFaultById)
 	e.PUT("/fault", handler.AddFault)
 	e.DELETE("/fault", handler.DestroyFault)
 	logOutput, _ := os.OpenFile(filepath.Join(util.GetRootPath(), "echo.log"), os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)

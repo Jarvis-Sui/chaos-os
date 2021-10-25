@@ -32,6 +32,16 @@ func GetFaults(c echo.Context) error {
 	return c.JSON(http.StatusOK, faults)
 }
 
+func GetFaultById(c echo.Context) error {
+	var id string
+	flags := pflag.FlagSet{}
+	flags.StringVar(&id, "id", "", "fault id")
+
+	flags.Set("id", c.Param("id"))
+	faults := manager.FaultStatus(&flags)
+	return c.JSON(http.StatusOK, faults)
+}
+
 func AddFault(c echo.Context) error {
 	if err := checkRequiredQueryParams(c.QueryParams(), []string{"cmd"}); err != nil {
 		return c.JSON(http.StatusBadRequest, errorMsg(err))

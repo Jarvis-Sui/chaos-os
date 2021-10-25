@@ -33,7 +33,7 @@ cp_3rd_bin:
 	cp 3rdparty/bin/* $(BUILD_TARGET_BIN)/
 
 build_on_centos:
-	# docker build -f "build/Dockerfile" -t go_centos .
+	docker build -f "build/Dockerfile" -t go_centos .
 	docker run -v "$(shell pwd)":/usr/src/chaos-os -w /usr/src/chaos-os -e GOOS=linux -e GOARCH=amd64 --name chaos-os go_centos make
 
 .PHONY:clean

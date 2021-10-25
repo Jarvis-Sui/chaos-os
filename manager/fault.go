@@ -85,6 +85,9 @@ func DestroyFault(flags *pflag.FlagSet) error {
 		logrus.WithFields(logrus.Fields{"err": err, "fault_id": id}).Error("failed to get fault")
 		return err
 	} else {
+		if fault.Status == b.FS_DESTROYED {
+			return nil
+		}
 		logrus.WithField("fault", fault).Info("destroy fault")
 		var args string
 		if fault.Type == b.FT_NETLOSS || fault.Type == b.FT_NETDELAY || fault.Type == b.FT_NETREORDER || fault.Type == b.FT_NETDUPLICATE || fault.Type == b.FT_NETCORRUPT {
@@ -105,7 +108,7 @@ func DestroyFault(flags *pflag.FlagSet) error {
 		cmd := exec.Command("bash", "-c", args)
 		if out, err := cmd.CombinedOutput(); err != nil {
 			table.UpdateFaultStatus(fault.Uid, string(b.FS_ERROR), fmt.Sprintf("%s. %s", out, err))
-			logrus.WithFields(logrus.Fields{"err": err, "fault": fault}).Error("failed to destroy fault")
+			logrus.WithFields(logrus.Fields{"err": err, "out": out, "fault": fault}).Error("failed to destroy fault")
 			return err
 		} else {
 			if err := table.UpdateFaultStatus(fault.Uid, string(b.FS_DESTROYED), ""); err != nil {

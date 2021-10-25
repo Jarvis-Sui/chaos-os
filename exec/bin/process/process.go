@@ -101,6 +101,7 @@ func run(flags *pflag.FlagSet, signal string) {
 	if len(pids) == 0 {
 		pattern, _ := flags.GetString("pattern")
 		pids = getPids(pattern)
+		logrus.WithFields(logrus.Fields{"pattern": pattern, "pids": pids}).Info("got pids of pattern")
 	}
 
 	strPids := []string{}

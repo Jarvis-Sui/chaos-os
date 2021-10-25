@@ -32,7 +32,7 @@ func buildProcCommonArgs(flags *pflag.FlagSet) string {
 				args += fmt.Sprintf("--pid %s", strings.Join(strPids, ","))
 			}
 		} else if f.Name == "pattern" {
-			args += fmt.Sprintf("--pattern %v ", f.Value)
+			args += fmt.Sprintf("--pattern '%v' ", f.Value)
 		}
 	})
 
