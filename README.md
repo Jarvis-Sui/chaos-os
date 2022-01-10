@@ -22,8 +22,10 @@ Chaos experiment for physical machine.
 # Server
 
 ```bash
-./chaos-os server start --port 12345 --background
-
+cp chaosos.service /usr/lib/systemd/system/
+systemctl daemon-reload
+systemctl enable chaosos.service
+systemctl start chaosos.service
 
 curl -G -X PUT "localhost:12345/fault" --data-urlencode "cmd=network loss -i bond0 --timeout 100 --dest-ip 11.167.254.40 --dest-port 8000 --percent 100"
 curl -X GET "localhost:12345/fault/status?id=46339f2f-ae1d-40b7-b9f4-ed08d8a7e71b"
@@ -34,4 +36,3 @@ curl -X DELETE "localhost:12345/fault?id=46339f2f-ae1d-40b7-b9f4-ed08d8a7e71b"
 # dependencies
 
 1. [stress-ng](https://github.com/ColinIanKing/stress-ng). for centos 7 by default. for other OS, please build it
-

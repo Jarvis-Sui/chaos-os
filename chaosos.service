@@ -1,0 +1,10 @@
+[Unit]
+Description=chaos service
+
+[Service]
+ExecStart=/root/agents/chaos-os/chaos-os server start --port 9530
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
