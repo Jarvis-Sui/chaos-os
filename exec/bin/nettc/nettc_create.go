@@ -218,7 +218,7 @@ func getNextClassMinor(device string) int {
 }
 
 func addClass(device string, classMinor int) {
-	args := fmt.Sprintf("tc class add dev %s classid 1:%d parent 1: htb rate 10000Mbps", device, classMinor)
+	args := fmt.Sprintf("tc class add dev %s classid 1:%d parent 1: htb rate 10000Mbit", device, classMinor)
 	execCmd(args)
 	logrus.WithFields(logrus.Fields{"interface": device, "class minor": classMinor}).Info("add new class")
 }

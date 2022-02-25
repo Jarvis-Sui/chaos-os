@@ -1,5 +1,9 @@
 Chaos experiment for physical machine.
 
+# Build
+```
+make build_on_centos
+```
 
 # How to use
 
